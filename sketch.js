@@ -24,7 +24,23 @@ checkBoxEnableWEBGL.addEventListener('change', function(event) {
         console.log('WEBGL disabled');
         enableWEBGL = false;
     }
-  });
+});
+
+let checkBoxEnableHunting = document.getElementById("checkbox-enableHunting");
+checkBoxEnableHunting.addEventListener('change', function(event) {
+    if (typeof EM === 'object' && EM instanceof EcosystemManager) {
+        if (event.target.checked) {
+            console.log('hunting enabled');
+            EM.enableHunting = true;
+        } else {
+            console.log('hunting disabled');
+            EM.enableHunting = false;
+        }
+    } else {
+        console.log("Wait until the ecosystem manager is initialized");
+    }
+});
+
 
 function preload() {
     customFont = loadFont('./fonts/Press_Start_2P/PressStart2P-Regular.ttf');
@@ -40,8 +56,9 @@ function setup() {
     resizeCanvas(canvasHolder.clientWidth, canvasHolder.clientHeight);
 
     //ecosystem
-    EM = new EcosystemManager(width*4, height*4);
-    EM.addCreatures(50);
+    EM = new EcosystemManager(width*2, height*2);
+    EM.enableHunting = checkBoxEnableHunting.checked;
+    EM.addCreatures(200);
 
     camera2d = new Camera2D();
     //frameRate(5);
@@ -70,7 +87,7 @@ function draw() {
         push();
         camera2d.applyTransformations();
         EM.update();
-        image(EM.graphics, -width*0.5, -height*0.5, width, height);
+        image(EM.graphics, -width*0.5, -height*0.5);
         pop();
     
     }else{
@@ -79,10 +96,11 @@ function draw() {
         EM.update();
 
         // Configure shader
-        let shaderDatas = EM.extractShaderDatas();
         drawBallsShader.setUniform('resolution', [width, height]);
+        drawBallsShader.setUniform('worldSize', [EM.worldSize.x, EM.worldSize.y]);
         drawBallsShader.setUniform('offsets', [camera2d.x, camera2d.y]);
         drawBallsShader.setUniform('zoom', camera2d.scale);
+        let shaderDatas = EM.extractShaderDatas();
         drawBallsShader.setUniform('ballDatas', shaderDatas);
         drawBallsShader.setUniform('ballSize', 10);
 

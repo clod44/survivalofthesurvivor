@@ -3,9 +3,11 @@ precision mediump float;
 #endif
 
 uniform vec2 resolution;
+uniform vec2 worldSize;
 uniform vec2 offsets;
 uniform float zoom;
-uniform vec4 ballDatas[50];
+const int NUM_BALLS = 200;
+uniform vec4 ballDatas[NUM_BALLS];
 uniform float ballSize;
 
 void drawBall(float d){
@@ -16,7 +18,7 @@ void drawBall(float d){
 
 void drawHollowCircle(float d, vec2 circleCenter, float circleRadius, vec4 circleColor) {
   // Calculate the thickness range of the circle's edges
-  float edgeThickness = 1.0;
+  float edgeThickness = 0.5;
   float innerRadius = circleRadius - edgeThickness;
   float outerRadius = circleRadius + edgeThickness;
 
@@ -33,19 +35,19 @@ void main() {
   vec2 invertedFragCoord = vec2(gl_FragCoord.x, resolution.y - gl_FragCoord.y);
 
   // Loop through the ballPositions array
-  for (int i = 0; i < 50; i++) {
+  for (int i = 0; i < NUM_BALLS; i++) {
     // Get the position for the current ball
     vec2 position = ballDatas[i].xy;
     float eyesight = ballDatas[i].z;
     float killSight = ballDatas[i].w;
     
     // Calculate the distance from the current fragment to the ball position
-        //translate(-this.x * this.scale,-this.y * this.scale);
-    vec2 coords = (invertedFragCoord.xy + offsets.xy / (1.0/zoom));
-    vec2 translatedCoords = coords - (resolution * 0.5);
-    vec2 zoomedCoords = translatedCoords * (1.0/zoom);
-    vec2 finalCoords = zoomedCoords + (resolution * 0.5);
-    float d = distance(finalCoords, position);
+    vec2 normalizedCoords = (invertedFragCoord.xy + offsets.xy * zoom) / resolution;
+    //at this point this looks random as my gf's scrambled ass
+    vec2 translatedCoords = (normalizedCoords - vec2(0.5)) * (1.0/zoom)*0.5 + vec2(0.25);
+    vec2 scaledCoords = translatedCoords * worldSize;
+    
+    float d = distance(scaledCoords, position);
     
     //ball
     drawBall(d);

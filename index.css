@@ -3,6 +3,9 @@ html, body {
     overflow: hidden;
     margin: 0;
     padding: 0;
+    font-family: monospace;
+    background-color: black;
+    color: white;
 }
 
   
@@ -11,3 +14,17 @@ html, body {
     height: 100%;
 }
 
+
+.debug {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Adjust the number of columns as needed */
+    grid-gap: 10px; /* Adjust the gap between grid items as needed */
+    border: 2px solid black; /* Outer border */
+    padding: 10px; /* Add padding to create inner border */
+}
+  
+.debug > div {
+    border: 1px solid rgb(0, 255, 0); /* Inner border */
+    padding: 5px; /* Add padding inside each grid item */
+    text-align: center;
+}

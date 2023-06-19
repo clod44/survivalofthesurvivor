@@ -2,85 +2,110 @@
 
 
 
-
-
-
 let canvasHolder = document.getElementById("canvas-holder");
-let canvas; 
+let canvas;
 
 let camera2d;
 let debugWindow;
 let EM;
 
-function setup(){
-    canvas = createCanvas(100,100);
-    background(0,255,0);
+let customFont;
+
+//shaders
+let drawBallsShader;
+
+let checkBoxEnableWEBGL = document.getElementById("checkbox-enableWEBGL");
+let enableWEBGL = checkBoxEnableWEBGL.checked;
+checkBoxEnableWEBGL.addEventListener('change', function(event) {
+    if (event.target.checked) {
+      console.log('WEBGL enabled');
+      enableWEBGL = true;
+    } else {
+        console.log('WEBGL disabled');
+        enableWEBGL = false;
+    }
+  });
+
+function preload() {
+    customFont = loadFont('./fonts/Press_Start_2P/PressStart2P-Regular.ttf');
+
+    // Load the shaders
+    drawBallsShader = loadShader('./shaders/draw_balls.vert', './shaders/draw_balls.frag');
+}
+function setup() {
+    canvas = createCanvas(100, 100, WEBGL);
+    background(0, 255, 0);
     canvas.parent("canvas-holder");
     noSmooth();
     resizeCanvas(canvasHolder.clientWidth, canvasHolder.clientHeight);
 
     //ecosystem
-    EM = new EcosystemManager(3000, 3000);
-    EM.addCreatures(10);
+    EM = new EcosystemManager(width*4, height*4);
+    EM.addCreatures(50);
 
     camera2d = new Camera2D();
     //frameRate(5);
 
-    debugWindow = new DebugWindow(10, 10);
-    
+
+
+    debugWindow = new DebugWindow(- width * 0.5 + 10, - height * 0.5 + 10, 300, 300);
+    debugWindow.g.textFont(customFont);
     debugWindow.add('FPS', () => frameRate().toFixed(2));
+    debugWindow.add('FPS', () => frameRate().toFixed(2), true);
+    debugWindow.add('::::::::::::::::::::', "");
     debugWindow.add('Cam X', () => camera2d.x.toFixed(2));
     debugWindow.add('Cam Y', () => camera2d.y.toFixed(2));
     debugWindow.add('Cam scale', () => camera2d.scale.toFixed(2));
+    debugWindow.add('creature count', () => EM.creatures.length);
+
 }
 
 
-function draw(){
+function draw() {
     background(0);
 
-
-    push();
-    camera2d.update();
-        
-    //world content
-    EM.update();
+    if(!enableWEBGL){
     
-    // image(EM.graphics, 0, 0, EM.graphics.width, EM.graphics.height);  
-      
-    camera2d.showUnboundedImage(EM.graphics);
-
-
-    camera2d.applyTransformations();
-    pop();
+        camera2d.update();
+        push();
+        camera2d.applyTransformations();
+        EM.update();
+        image(EM.graphics, -width*0.5, -height*0.5, width, height);
+        pop();
     
+    }else{
+    
+        camera2d.update();    
+        EM.update();
+
+        // Configure shader
+        let shaderDatas = EM.extractShaderDatas();
+        drawBallsShader.setUniform('resolution', [width, height]);
+        drawBallsShader.setUniform('offsets', [camera2d.x, camera2d.y]);
+        drawBallsShader.setUniform('zoom', camera2d.scale);
+        drawBallsShader.setUniform('ballDatas', shaderDatas);
+        drawBallsShader.setUniform('ballSize', 10);
+
+        // Apply shader
+        shader(drawBallsShader);
+        // Draw rectangle
+        rect(-width / 2, -height / 2, width, height);
 
 
+        //////////REQUIRED workaround to reset 2d drawing behavior
+        const gl = canvas.canvas.getContext('webgl');
+        gl.disable(gl.DEPTH_TEST);
+        resetShader();
 
-
-    //grids
-    image(camera2d.graphics, 0, 0, width, height);
-
-    //debug window
+    }
     debugWindow.display();
 
 }
 
-function findLargestMultiple(X, Y, Z) {
-    const quotient = Math.floor(Y / Z);
-    const largestMultiple = quotient * Z;
-    
-    if (largestMultiple > X) {
-      return largestMultiple - Z;
-    }
-    
-    return largestMultiple;
-  }
-  
-  
-  
+
 function windowResized() {
     resizeCanvas(canvasHolder.clientWidth, canvasHolder.clientHeight);
-    
+
     camera2d = new Camera2D();
 }
 
@@ -88,19 +113,19 @@ function windowResized() {
 
 function mousePressed() {
     camera2d.mousePressed();
-  }
-  
-  function mouseReleased() {
+}
+
+function mouseReleased() {
     camera2d.mouseReleased();
-  }
-  
-  function mouseDragged() {
+}
+
+function mouseDragged() {
     camera2d.mouseDragged();
-  }
-  
-  function mouseWheel(event) {
+}
+
+function mouseWheel(event) {
     camera2d.mouseWheel(event);
-  }
+}
 
 
 

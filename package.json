@@ -1,0 +1,14 @@
+{
+  "name": "survivalofthesurvivor",
+  "version": "1.0.0",
+  "description": "basic evolution simulation",
+  "main": "sketch.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "clod44",
+  "license": "MIT",
+  "dependencies": {
+    "p5": "^1.6.0"
+  }
+}

@@ -58,7 +58,7 @@ function setup() {
     //ecosystem
     EM = new EcosystemManager(width*4, height*4);
     EM.enableHunting = checkBoxEnableHunting.checked;
-    EM.addCreatures(2);
+    EM.addCreatures(50);
 
     camera2d = new Camera2D();
     //frameRate(5);

@@ -6,7 +6,7 @@ uniform vec2 resolution;
 uniform vec2 worldSize;
 uniform vec2 offsets;
 uniform float zoom;
-const int NUM_BALLS = 2;
+const int NUM_BALLS = 50;
 uniform vec4 ballDatas1[NUM_BALLS]; //x y eyesight killsight
 uniform vec3 ballDatas2[NUM_BALLS]; //r g b
 uniform float ballSize;
@@ -45,7 +45,7 @@ void main() {
 
     // Calculate the distance from the current fragment to the ball position
     vec2 normalizedCoords = (invertedFragCoord.xy + offsets.xy * zoom) / resolution;
-    vec2 translatedCoords = (normalizedCoords - vec2(0.5)) * (1.0 / zoom) * 0.5 + vec2(0.25);
+    vec2 translatedCoords = (normalizedCoords - vec2(0.5)) * (1.0 / zoom);
     vec2 scaledCoords = translatedCoords * worldSize;
 
     // Apply modulo operations to create infinite mirrored effect

@@ -6,13 +6,14 @@ uniform vec2 resolution;
 uniform vec2 worldSize;
 uniform vec2 offsets;
 uniform float zoom;
-const int NUM_BALLS = 200;
-uniform vec4 ballDatas[NUM_BALLS];
+const int NUM_BALLS = 2;
+uniform vec4 ballDatas1[NUM_BALLS]; //x y eyesight killsight
+uniform vec3 ballDatas2[NUM_BALLS]; //r g b
 uniform float ballSize;
 
-void drawBall(float d){
+void drawBall(float d, vec3 ballColor){
     if (d < ballSize) {
-      gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+      gl_FragColor = vec4(ballColor, 1.0);
     }
 }
 
@@ -37,24 +38,32 @@ void main() {
   // Loop through the ballPositions array
   for (int i = 0; i < NUM_BALLS; i++) {
     // Get the position for the current ball
-    vec2 position = ballDatas[i].xy;
-    float eyesight = ballDatas[i].z;
-    float killSight = ballDatas[i].w;
-    
+    vec2 position = ballDatas1[i].xy;
+    float eyesight = ballDatas1[i].z;
+    float killSight = ballDatas1[i].w;
+    vec3 ballColor = ballDatas2[i].rgb;
+
     // Calculate the distance from the current fragment to the ball position
     vec2 normalizedCoords = (invertedFragCoord.xy + offsets.xy * zoom) / resolution;
-    //at this point this looks random as my gf's scrambled ass
-    vec2 translatedCoords = (normalizedCoords - vec2(0.5)) * (1.0/zoom)*0.5 + vec2(0.25);
+    vec2 translatedCoords = (normalizedCoords - vec2(0.5)) * (1.0 / zoom) * 0.5 + vec2(0.25);
     vec2 scaledCoords = translatedCoords * worldSize;
-    
+
+    // Apply modulo operations to create infinite mirrored effect
+    /*
+    vec2 mirroredCoords = vec2(
+      mod(scaledCoords.x, worldSize.x),
+      mod(scaledCoords.y, worldSize.y)
+    );
+    */
+
+//    float d = distance(mirroredCoords, position);
     float d = distance(scaledCoords, position);
-    
+
     //ball
-    drawBall(d);
+    drawBall(d, ballColor);
     //eyesight
     drawHollowCircle(d, position, eyesight, vec4(0.0, 1.0, 0.0, 1.0));
     //killSight
     drawHollowCircle(d, position, killSight, vec4(1.0, 0.0, 0.0, 1.0));
-
   }
 }

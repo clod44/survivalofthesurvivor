@@ -56,9 +56,9 @@ function setup() {
     resizeCanvas(canvasHolder.clientWidth, canvasHolder.clientHeight);
 
     //ecosystem
-    EM = new EcosystemManager(width*2, height*2);
+    EM = new EcosystemManager(width*4, height*4);
     EM.enableHunting = checkBoxEnableHunting.checked;
-    EM.addCreatures(200);
+    EM.addCreatures(2);
 
     camera2d = new Camera2D();
     //frameRate(5);
@@ -81,6 +81,9 @@ function setup() {
 function draw() {
     background(0);
 
+    camera2d.drawGrid();
+    image(camera2d.graphics,-width*0.5, -height*0.5);
+
     if(!enableWEBGL){
     
         camera2d.update();
@@ -88,6 +91,16 @@ function draw() {
         camera2d.applyTransformations();
         EM.update();
         image(EM.graphics, -width*0.5, -height*0.5);
+        /*
+        camera2d.showUnboundedImage(EM.graphics,{
+            xOffset : EM.worldSize.x / -width * 0.5,
+            yOffset : EM.worldSize.y / -height * 0.5,
+            imageWidth : EM.worldSize.x,
+            imageHeight : EM.worldSize.y,
+            moduloWidth : EM.worldSize.x,
+            moduloHeight : EM.worldSize.y
+        });
+        */
         pop();
     
     }else{
@@ -101,7 +114,8 @@ function draw() {
         drawBallsShader.setUniform('offsets', [camera2d.x, camera2d.y]);
         drawBallsShader.setUniform('zoom', camera2d.scale);
         let shaderDatas = EM.extractShaderDatas();
-        drawBallsShader.setUniform('ballDatas', shaderDatas);
+        drawBallsShader.setUniform('ballDatas1', shaderDatas[0].flat());
+        drawBallsShader.setUniform('ballDatas2', shaderDatas[1].flat());
         drawBallsShader.setUniform('ballSize', 10);
 
         // Apply shader
